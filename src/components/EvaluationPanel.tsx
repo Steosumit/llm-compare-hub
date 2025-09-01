@@ -26,7 +26,7 @@ export function EvaluationPanel({ responses }: EvaluationPanelProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
       {/* Evaluation Matrix */}
       <Card>
         <CardHeader>
@@ -60,12 +60,12 @@ export function EvaluationPanel({ responses }: EvaluationPanelProps) {
       </Card>
 
       {/* Responses */}
-      <Card className="flex-1">
+      <Card className="h-full flex flex-col">
         <CardHeader>
           <CardTitle className="text-lg">Responses</CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
-          <ScrollArea className="h-96">
+        <CardContent className="p-0 flex-1">
+          <ScrollArea className="h-full">
             <div className="p-6 space-y-4">
               {responses.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">

@@ -109,7 +109,7 @@ const Index = () => {
       />
       
       <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[80vh]">
           {/* Left Panel - Prompt Cards */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">

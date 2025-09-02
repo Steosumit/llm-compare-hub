@@ -3,15 +3,17 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, Trash2, Send } from "lucide-react";
+import { Copy, Trash2, Send, Check} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PromptCardProps {
   id: string;
   initialPrompt?: string;
   patternType?: string;
+  enabled?: boolean;
   onDelete: (id: string) => void;
   onSend: (id: string, prompt: string, model: string) => void;
+  onEnableToggle?: (id: string, enabled: boolean) => void;
 }
 
 const models = [
@@ -30,13 +32,13 @@ const patternTemplates = {
   alternatives: "Provide 3 different approaches to:\n\n",
 };
 
-export function PromptCard({ id, initialPrompt, patternType, onDelete, onSend }: PromptCardProps) {
+export function PromptCard({ id, initialPrompt, patternType, enabled = true, onDelete, onSend, onEnableToggle }: PromptCardProps) {
+
   const [prompt, setPrompt] = useState(
     initialPrompt || (patternType ? patternTemplates[patternType as keyof typeof patternTemplates] : "")
   );
   const [selectedModel, setSelectedModel] = useState<string>("gpt-4");
   const { toast } = useToast();
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(prompt);
@@ -54,6 +56,15 @@ export function PromptCard({ id, initialPrompt, patternType, onDelete, onSend }:
   };
 
   const handleSend = () => {
+    if (!enabled) {
+      toast({
+        title: "Card disabled",
+        description: "Enable the card first to send the prompt.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!prompt.trim()) {
       toast({
         title: "Empty prompt",
@@ -66,11 +77,17 @@ export function PromptCard({ id, initialPrompt, patternType, onDelete, onSend }:
   };
 
   return (
-    <Card className="mb-4 transition-shadow duration-200 hover:shadow-md">
+    <Card className={`mb-4 transition-all duration-200 hover:shadow-md ${
+      enabled ? '' : 'opacity-50 bg-muted/30'
+    }`}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Select value={selectedModel} onValueChange={setSelectedModel}>
+            <Select 
+              value={selectedModel} 
+              onValueChange={setSelectedModel}
+              disabled={!enabled}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue />
               </SelectTrigger>
@@ -84,15 +101,33 @@ export function PromptCard({ id, initialPrompt, patternType, onDelete, onSend }:
             </Select>
             
             {patternType && (
-              <span className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded">
+              <span className={`text-xs px-2 py-1 rounded ${
+                enabled 
+                  ? 'bg-accent text-accent-foreground' 
+                  : 'bg-muted text-muted-foreground'
+              }`}>
                 {patternType.toUpperCase()}
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={handleCopy}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleCopy}
+              disabled={!enabled}
+            >
               <Copy className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => onEnableToggle?.(id, !enabled)}
+              className={enabled ? "text-green-600" : "text-red-500"}
+              title={enabled ? "Disable card" : "Enable card"}
+            >
+              <Check className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="sm" onClick={() => onDelete(id)}>
               <Trash2 className="h-4 w-4" />
@@ -107,9 +142,14 @@ export function PromptCard({ id, initialPrompt, patternType, onDelete, onSend }:
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Enter your prompt here..."
           className="min-h-32 mb-3 resize-none"
+          disabled={!enabled}
         />
         
-        <Button onClick={handleSend} className="w-full">
+        <Button 
+          onClick={handleSend} 
+          className="w-full"
+          disabled={!enabled}
+        >
           <Send className="h-4 w-4 mr-2" />
           Send to {models.find(m => m.value === selectedModel)?.label}
         </Button>

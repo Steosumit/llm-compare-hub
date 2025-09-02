@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -55,78 +56,130 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">API Tokens</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Configure your API tokens to enable model comparisons. Tokens are stored locally in your browser.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {providers.map((provider) => (
-                <div key={provider.key} className="space-y-2">
-                  <Label htmlFor={provider.key}>{provider.name} API Token</Label>
-                  <div className="relative">
-                    <Input
-                      id={provider.key}
-                      type={showTokens[provider.key] ? "text" : "password"}
-                      placeholder={provider.placeholder}
-                      value={tokens[provider.key as keyof typeof tokens]}
-                      onChange={(e) => handleTokenChange(provider.key, e.target.value)}
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3"
-                      onClick={() => toggleTokenVisibility(provider.key)}
-                    >
-                      {showTokens[provider.key] ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
+        <ScrollArea className="flex-1 pr-6">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">API Tokens</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Configure your API tokens to enable model comparisons. Tokens are stored locally in your browser.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {providers.map((provider) => (
+                  <div key={provider.key} className="space-y-2">
+                    <Label htmlFor={provider.key}>{provider.name} API Token</Label>
+                    <div className="relative">
+                      <Input
+                        id={provider.key}
+                        type={showTokens[provider.key] ? "text" : "password"}
+                        placeholder={provider.placeholder}
+                        value={tokens[provider.key as keyof typeof tokens]}
+                        onChange={(e) => handleTokenChange(provider.key, e.target.value)}
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => toggleTokenVisibility(provider.key)}
+                      >
+                        {showTokens[provider.key] ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Personal Information</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Optional: Add your information for context in prompts.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input id="name" placeholder="Your name" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Role</Label>
+                    <Input id="role" placeholder="e.g., Prompt Engineer" />
                   </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Personal Information</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Optional: Add your information for context in prompts.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input id="name" placeholder="Your name" />
+                  <Label htmlFor="company">Company/Organization</Label>
+                  <Input id="company" placeholder="Your company" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Preferences</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Customize your experience and behavior settings.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="theme">Theme</Label>
+                  <Input id="theme" placeholder="Light/Dark/System" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Input id="role" placeholder="e.g., Prompt Engineer" />
+                  <Label htmlFor="language">Default Language</Label>
+                  <Input id="language" placeholder="English" />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="company">Company/Organization</Label>
-                <Input id="company" placeholder="Your company" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                <div className="space-y-2">
+                  <Label htmlFor="timeout">Request Timeout (seconds)</Label>
+                  <Input id="timeout" placeholder="30" type="number" />
+                </div>
+              </CardContent>
+            </Card>
 
-        <div className="flex justify-end gap-2 pt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Advanced Settings</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Advanced configuration options for power users.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="maxTokens">Max Tokens</Label>
+                  <Input id="maxTokens" placeholder="2048" type="number" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="temperature">Temperature</Label>
+                  <Input id="temperature" placeholder="0.7" type="number" step="0.1" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="topP">Top P</Label>
+                  <Input id="topP" placeholder="1.0" type="number" step="0.1" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="customEndpoint">Custom API Endpoint</Label>
+                  <Input id="customEndpoint" placeholder="https://api.example.com" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </ScrollArea>
+
+        <div className="flex justify-end gap-2 pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

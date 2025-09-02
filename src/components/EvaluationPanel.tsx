@@ -26,39 +26,7 @@ export function EvaluationPanel({ responses }: EvaluationPanelProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
-      {/* Evaluation Matrix */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Evaluation Matrix</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-4 gap-4 text-sm">
-            <div className="font-medium">Model</div>
-            <div className="font-medium">Status</div>
-            <div className="font-medium">Response Time</div>
-            <div className="font-medium">Quality Score</div>
-            
-            {responses.map((response) => (
-              <div key={response.id} className="contents">
-                <div className="py-2">{response.model}</div>
-                <div className="py-2">
-                  <Badge className={getStatusColor(response.status)}>
-                    {response.status}
-                  </Badge>
-                </div>
-                <div className="py-2 text-muted-foreground">
-                  {response.status === 'success' ? '1.2s' : '-'}
-                </div>
-                <div className="py-2 text-muted-foreground">
-                  {response.status === 'success' ? 'TBD' : '-'}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
+    <div className="grid grid-cols-1 gap-4 h-full">
       {/* Responses */}
       <Card className="h-full flex flex-col">
         <CardHeader>

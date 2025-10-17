@@ -19,7 +19,7 @@ interface PromptCardProps {
 const models = [
   { value: "gpt-4", label: "GPT-4" },
   { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
-  { value: "gemini-pro", label: "Gemini Pro" },
+  { value: "gemini-2.5-flash", label: "gemini-2.5-flash" },
   { value: "claude-3", label: "Claude 3" },
 ];
 

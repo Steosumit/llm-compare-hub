@@ -5,7 +5,13 @@ import { EvaluationPanel } from "@/components/EvaluationPanel";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Send } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, Send, History } from "lucide-react";
+import { set } from "date-fns";
+
+// Environemnt variables
+var SEND_URL = "http://127.0.0.1:8000/send"
 
 interface PromptCardData {
   id: string;
@@ -21,12 +27,14 @@ interface Response {
   response: string;
   timestamp: Date;
   status: 'pending' | 'success' | 'error';
+  rememberHistory: boolean;
 }
 
 const Index = () => {
   const [promptCards, setPromptCards] = useState<PromptCardData[]>([]);
   const [responses, setResponses] = useState<Response[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [rememberChatHistory, setRememberChatHistory] = useState(false);
 
   const addPromptCard = (patternType?: string) => {
     const newCard: PromptCardData = {
@@ -50,55 +58,85 @@ const Index = () => {
     ));
   };
 
-  const handleSendPrompt = (cardId: string, prompt: string, model: string) => {
+  const handleSendPrompt = async (cardId: string, prompt: string, model: string) => {
     // Check if the card is enabled before sending
     const card = promptCards.find(c => c.id === cardId);
     if (!card?.enabled) {
       return; // Don't send if card is disabled
     }
-
+    // If card is enabled then IMP: PROMPT SENDING CODE
     const newResponse: Response = {
       id: `response-${Date.now()}-${Math.random()}`,
       model,
       prompt,
       response: "",
       timestamp: new Date(),
-      status: 'pending'
+      status: 'pending',
+      rememberHistory: rememberChatHistory
     };
 
     setResponses(prev => [newResponse, ...prev]);
 
-    // Simulate API call
-    setTimeout(() => {
-      setResponses(prev => prev.map(resp => 
-        resp.id === newResponse.id 
-          ? { 
-              ...resp, 
-              status: 'success' as const,
-              response: `This is a simulated response from ${model} for the prompt: "${prompt.substring(0, 50)}..."\n\nTo enable real responses, configure your API tokens in Settings.`
-            }
-          : resp
-      ));
-    }, 2000);
+    // Instead of simulating a call send a call to /send
+    // TODO: PUT SEND CODE[DONE]
+    try {
+      // Build request payload with chat history setting
+      const requestPayload = {
+        ...newResponse,
+        rememberHistory: rememberChatHistory,
+        // Include last 5 successful responses if history is enabled
+        chatHistory: rememberChatHistory 
+          ? responses
+              .filter(r => r.status === 'success')
+              .slice(0, 5)
+              .map(r => ({ prompt: r.prompt, response: r.response, model: r.model }))
+          : []
+      };
+
+      const res = await fetch(SEND_URL, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(requestPayload)
+      });
+
+      if (!res.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await res.json();
+      // set the respones if received properly
+      setResponses(prev =>
+        prev.map(resp =>
+          (resp.id === newResponse.id) ? {... resp, status: 'success', response: data.response} : resp
+        )
+      );
+    } catch (error: any) {
+      setResponses(prev =>
+        prev.map(resp =>
+          (resp.id === newResponse.id) ? {... resp, status: 'error', response: error.message} : resp
+        )
+      );
+    }
   };
 
+  // IMP: BATCH PROMPT SENDING CODE
   const handleSendAllPrompts = () => {
     // Only send enabled cards with valid prompts
     const validCards = promptCards.filter(card => card.enabled && card.prompt.trim());
     
     if (validCards.length === 0) {
-      return;
+      return;  // all the cards are disabled
     }
 
     validCards.forEach((card, index) => {
       setTimeout(() => {
         const newResponse: Response = {
           id: `response-${Date.now()}-${Math.random()}-${index}`,
-          model: 'gpt-4', // Default model for batch sending
+          model: 'gemini-2.5-flash', // default
           prompt: card.prompt,
           response: "",
           timestamp: new Date(),
-          status: 'pending'
+          status: 'pending',
+          rememberHistory: rememberChatHistory
         };
 
         setResponses(prev => [newResponse, ...prev]);
@@ -110,7 +148,7 @@ const Index = () => {
               ? { 
                   ...resp, 
                   status: 'success' as const,
-                  response: `[Batch Response] This is a simulated response from GPT-4 for connected prompt: "${card.prompt.substring(0, 50)}..."\n\nTo enable real responses, configure your API tokens in Settings.`
+                  response: `[Batch Response] This is a simulated response from ${card.patternType} for connected prompt: "${card.prompt.substring(0, 50)}..."\n\nTo enable real responses, configure your API tokens in Settings.`
                 }
               : resp
           ));
@@ -125,6 +163,45 @@ const Index = () => {
         onAddPromptPattern={addPromptCard}
         onSettingsClick={() => setSettingsOpen(true)}
       />
+      
+      {/* Chat History Toggle - Below Toolbar */}
+      <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="inline-flex items-center gap-3 px-4 py-2 rounded-lg border border-border bg-card hover:bg-accent/50 transition-all cursor-pointer">
+                  <History className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Remember Chat History</span>
+                  <Switch 
+                    checked={rememberChatHistory}
+                    onCheckedChange={setRememberChatHistory}
+                  />
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    rememberChatHistory 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+                  }`}>
+                    {rememberChatHistory ? 'ON' : 'OFF'}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-sm">
+                <div className="space-y-1">
+                  <p className="font-semibold">
+                    {rememberChatHistory ? '✓ Chat History Enabled' : '○ Chat History Disabled'}
+                  </p>
+                  <p className="text-xs">
+                    {rememberChatHistory 
+                      ? "Previous conversations will be included in context for better continuity. The last 5 successful responses will be sent with each new prompt." 
+                      : "Each prompt will be sent independently without previous context. Enable this for multi-turn conversations."}
+                  </p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
       
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[80vh]">

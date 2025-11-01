@@ -5,16 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Copy, Trash2, Send, Check} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface PromptCardProps {
-  id: string;
-  initialPrompt?: string;
-  patternType?: string;
-  enabled?: boolean;
-  onDelete: (id: string) => void;
-  onSend: (id: string, prompt: string, model: string) => void;
-  onEnableToggle?: (id: string, enabled: boolean) => void;
-}
+import { patternTemplates, PatternType } from "@/lib/patternTemplates";
 
 const models = [
   { value: "gpt-4", label: "GPT-4" },
@@ -23,19 +14,21 @@ const models = [
   { value: "claude-3", label: "Claude 3" },
 ];
 
-const patternTemplates = {
-  cot: "Think step by step to solve this problem:\n\n",
-  meta: "Please generate a prompt that would help me:\n\n",
-  persona: "You are a [ROLE]. Your task is to:\n\n",
-  template: "Given [INPUT], please [ACTION] and provide [OUTPUT]:\n\n",
-  refinement: "Help me refine this question to get better results:\n\n",
-  alternatives: "Provide 3 different approaches to:\n\n",
-};
+
+interface PromptCardProps {
+  id: string;
+  initialPrompt?: string;
+  patternType?: PatternType;
+  enabled?: boolean;
+  onDelete: (id: string) => void;
+  onSend: (id: string, prompt: string, model: string) => void;
+  onEnableToggle?: (id: string, enabled: boolean) => void;
+}
 
 export function PromptCard({ id, initialPrompt, patternType, enabled = true, onDelete, onSend, onEnableToggle }: PromptCardProps) {
 
   const [prompt, setPrompt] = useState(
-    initialPrompt || (patternType ? patternTemplates[patternType as keyof typeof patternTemplates] : "")
+    initialPrompt || (patternType ? patternTemplates[patternType] : "")
   );
   const [selectedModel, setSelectedModel] = useState<string>("gpt-4");
   const { toast } = useToast();
@@ -106,7 +99,7 @@ export function PromptCard({ id, initialPrompt, patternType, enabled = true, onD
                   ? 'bg-accent text-accent-foreground' 
                   : 'bg-muted text-muted-foreground'
               }`}>
-                {patternType.toUpperCase()}
+                {String(patternType).toUpperCase()}
               </span>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toolbar } from "@/components/Toolbar";
 import { PromptCard } from "@/components/PromptCard";
 import { EvaluationPanel } from "@/components/EvaluationPanel";
@@ -12,6 +12,12 @@ import { set } from "date-fns";
 
 // Environemnt variables
 var SEND_URL = "http://127.0.0.1:8000/send"
+
+interface SessionResponse {
+  message: string;
+  session_id: string;
+  status: string;
+}
 
 interface PromptCardData {
   id: string;
@@ -35,6 +41,33 @@ const Index = () => {
   const [responses, setResponses] = useState<Response[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [rememberChatHistory, setRememberChatHistory] = useState(false);
+  const [sessionId, setSessionId] = useState<string>("");
+
+  // Fetch session ID on component mount
+  useEffect(() => {
+    const fetchSessionId = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/", {
+          method: "GET",
+        });
+
+        if (response.ok) {
+          const data: SessionResponse = await response.json();
+          console.log("Session initialized:", data);
+          setSessionId(data.session_id);
+        } else {
+          console.error("Failed to fetch session ID:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching session ID:", error);
+        // Generate fallback session ID
+        const fallbackId = `session-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        setSessionId(fallbackId);
+      }
+    };
+
+    fetchSessionId();
+  }, []);
 
   const addPromptCard = (patternType?: string) => {
     const newCard: PromptCardData = {
@@ -66,7 +99,7 @@ const Index = () => {
     }
     // If card is enabled then IMP: PROMPT SENDING CODE
     const newResponse: Response = {
-      id: `response-${Date.now()}-${Math.random()}`,
+      id: `${sessionId}`,
       model,
       prompt,
       response: "",
@@ -162,6 +195,7 @@ const Index = () => {
       <Toolbar
         onAddPromptPattern={addPromptCard}
         onSettingsClick={() => setSettingsOpen(true)}
+        sessionId={sessionId}
       />
       
       {/* Chat History Toggle - Below Toolbar */}

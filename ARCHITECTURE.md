@@ -636,5 +636,5 @@ Send prompt to LLM and get response.
 
 ## Conclusion
 
-LLM Compare Hub provides a robust, extensible architecture for comparing prompts across multiple LLM providers. The separation of concerns between frontend and backend, combined with a flexible pattern system, makes it an ideal tool for prompt engineering research and development.
+LLM Compare Hub provides a robust, extensible architecture for comparing prompts across multiple LLM providers. The separation of concerns between frontend and backend, and class based abstraction makes it a scalble model for expansion to make a prompt engineering application
 

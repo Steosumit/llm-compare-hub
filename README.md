@@ -1,8 +1,28 @@
-# llm-compare-hub
 
-> Build by: steosumit (steosumit@gmail.com)
+# LLM Compare Hub
 
-> Inspired by: Prompt Engineering with ChatGPT by Vanderbilt University on Coursera
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-Build_Tool-646CFF?logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-UI-06B6D4?logo=tailwindcss&logoColor=white)
+![Gemini API](https://img.shields.io/badge/Gemini-LLM_API-8E75B2?logo=google&logoColor=white)
+
+⚠️ **Update**  
+Just discovered a similar but robust platform, been using it:  
+https://eu.smith.langchain.com/o/d06a25ae-7832-46f3-947f-edf6ecd278bc/playground
+
+---
+
+👨‍💻 **Built by**  
+Steosumit — steosumit@gmail.com  
+
+🎓 **Inspired by**  
+*Prompt Engineering with ChatGPT*  
+Vanderbilt University — Coursera
+# LLM Compare Hub
+
 
 ## Overview
 llm-compare-hub is a personal problem inspiration tool I decided to build to study the behavior of prompts on LLM.
